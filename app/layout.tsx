@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Galactic Breach",
   description:
-    "A web game to test your ability to think quick and to test your fingers's agility on your keyboard.",
+    "An alien themed web game to test your ability to think quick and to test your fingers's agility on your keyboard.",
 };
 
 export default function RootLayout({
