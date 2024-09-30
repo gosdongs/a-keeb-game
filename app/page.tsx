@@ -15,10 +15,13 @@ import {
   BEGINNING_LENGTH,
   BEGINNING_LEVEL,
   BEGINNING_TIMER,
+  PLAYBACK_RATE_DEFAULT,
 } from "./constants";
 import { themeChange } from "theme-change";
 import { TypeAnimation } from "react-type-animation";
 import { useTimer } from "react-timer-hook";
+import useSound from "use-sound";
+import beepSound from "/public/audio/beep.mp3";
 
 const robotoMono = Roboto_Mono({
   weight: "400",
@@ -50,6 +53,8 @@ const App = () => {
       return time;
     })(),
     onExpire: () => {
+      setPlaybackRate(PLAYBACK_RATE_DEFAULT);
+
       setLossByTime({
         level: currentLevel,
         sequence: currentSequence,
@@ -64,8 +69,13 @@ const App = () => {
   const [highScore, setHighScore] = useLocalStorageState("highScore", {
     defaultValue: 0,
   });
-  const [theme, setTheme] = useLocalStorageState("theme", {
-    defaultValue: "default",
+  const [theme, setTheme] = useLocalStorageState("forest", {
+    defaultValue: "forest",
+  });
+  const [playbackRate, setPlaybackRate] = useState(PLAYBACK_RATE_DEFAULT);
+  const [play] = useSound(beepSound, {
+    playbackRate,
+    interrupt: false,
   });
 
   const keycaps = useMemo(
@@ -104,6 +114,8 @@ const App = () => {
 
         restart(time, true);
 
+        setPlaybackRate(PLAYBACK_RATE_DEFAULT);
+
         setLossByLetGo(null);
         setLossByWrongInput(null);
         setLossByTime(null);
@@ -119,6 +131,10 @@ const App = () => {
         return;
       }
 
+      play();
+
+      setPlaybackRate((prev) => prev + 0.25);
+
       setCurrentInput((prev) => prev + event.key.toLowerCase());
     },
     [isLevelStarted, restart, timerSeconds]
@@ -132,6 +148,8 @@ const App = () => {
         event.key !== "Enter"
       ) {
         pause();
+
+        setPlaybackRate(PLAYBACK_RATE_DEFAULT);
 
         setLossByLetGo({
           level: currentLevel,
@@ -213,6 +231,8 @@ const App = () => {
     if (currentInput !== currentSequenceToCompare) {
       pause();
 
+      setPlaybackRate(PLAYBACK_RATE_DEFAULT);
+
       setLossByWrongInput({
         level: currentLevel,
         sequence: currentSequence,
@@ -280,11 +300,7 @@ const App = () => {
   return (
     <div className={`${robotoMono.className} h-full`}>
       <div className="flex flex-row justify-between items-center">
-        <div
-          className={
-            isLevelStarted ? "dropdown w-44 invisible" : "dropdown w-44"
-          }
-        >
+        <div className="dropdown w-96 invisible">
           <div tabIndex={0} role="button" className="btn text-base font-normal">
             Theme
             <svg
@@ -303,93 +319,25 @@ const App = () => {
           >
             <li>
               <input
-                data-set-theme="default"
+                data-set-theme="forest"
                 type="radio"
                 name="theme-dropdown"
                 className="theme-controller btn btn-sm btn-block btn-ghost justify-start font-normal"
-                aria-label="Default"
-                value="default"
-                checked={theme === "default"}
+                aria-label="Forest"
+                value="forest"
+                checked={theme === "forest"}
                 onChange={() => {
-                  setTheme("default");
-                }}
-              />
-            </li>
-            <li>
-              <input
-                data-set-theme="light"
-                type="radio"
-                name="theme-dropdown"
-                className="theme-controller btn btn-sm btn-block btn-ghost justify-start font-normal"
-                aria-label="Light"
-                value="light"
-                checked={theme === "light"}
-                onChange={() => {
-                  setTheme("light");
-                }}
-              />
-            </li>
-            <li>
-              <input
-                data-set-theme="dark"
-                type="radio"
-                name="theme-dropdown"
-                className="theme-controller btn btn-sm btn-block btn-ghost justify-start font-normal"
-                aria-label="Dark"
-                value="dark"
-                checked={theme === "dark"}
-                onChange={() => {
-                  setTheme("dark");
-                }}
-              />
-            </li>
-            <li>
-              <input
-                data-set-theme="aqua"
-                type="radio"
-                name="theme-dropdown"
-                className="theme-controller btn btn-sm btn-block btn-ghost justify-start font-normal"
-                aria-label="Aqua"
-                value="aqua"
-                checked={theme === "aqua"}
-                onChange={() => {
-                  setTheme("aqua");
-                }}
-              />
-            </li>
-            <li>
-              <input
-                data-set-theme="coffee"
-                type="radio"
-                name="theme-dropdown"
-                className="theme-controller btn btn-sm btn-block btn-ghost justify-start font-normal"
-                aria-label="Coffee"
-                value="coffee"
-                checked={theme === "coffee"}
-                onChange={() => {
-                  setTheme("coffee");
-                }}
-              />
-            </li>
-            <li>
-              <input
-                data-set-theme="retro"
-                type="radio"
-                name="theme-dropdown"
-                className="theme-controller btn btn-sm btn-block btn-ghost justify-start font-normal"
-                aria-label="Retro"
-                value="retro"
-                checked={theme === "retro"}
-                onChange={() => {
-                  setTheme("retro");
+                  setTheme("forest");
                 }}
               />
             </li>
           </ul>
         </div>
-        {!isLevelStarted && <div>TATSUMAKEEB</div>}
+        {!isLevelStarted && <div>GALACTIC BREACH</div>}
         {!isLevelStarted && (
-          <div className="w-44 text-right">HIGHEST LEVEL: {highScore}</div>
+          <div className="w-96 text-right">
+            DEEPEST SECURITY LAYER BREACHED: {highScore}
+          </div>
         )}
       </div>
       {isLevelStarted ? (
@@ -403,30 +351,30 @@ const App = () => {
             <div className="flex flex-col justify-center items-center">
               {lossByLetGo && (
                 <div className="loss-reason">
-                  You lost on level {lossByLetGo.level} by letting go of{" "}
-                  {lossByLetGo.character.toUpperCase()} in{" "}
+                  You got booted on security layer {lossByLetGo.level} by
+                  letting go of {lossByLetGo.character.toUpperCase()} in{" "}
                   {lossByLetGo.sequence.toUpperCase()}.
                 </div>
               )}
               {lossByWrongInput && (
                 <div className="loss-reason">
-                  You lost on level {lossByWrongInput.level} by pressing{" "}
-                  {lossByWrongInput.character.toUpperCase()} instead of{" "}
+                  You got booted on security layer {lossByWrongInput.level} by
+                  pressing {lossByWrongInput.character.toUpperCase()} instead of{" "}
                   {lossByWrongInput.expectedCharacter.toUpperCase()} in{" "}
                   {lossByWrongInput.sequence.toUpperCase()}.
                 </div>
               )}
               {lossByTime && (
                 <div className="loss-reason">
-                  You lost on level {lossByTime.level} by running out of time
-                  finishing {lossByTime.sequence.toUpperCase()}.
+                  You got booted on security layer {lossByTime.level} by running
+                  out of time finishing {lossByTime.sequence.toUpperCase()}.
                 </div>
               )}
               {!lossByLetGo && !lossByTime && !lossByWrongInput && (
                 <>
                   <div className="mb-5">
                     <TypeAnimation
-                      sequence={["RULES:"]}
+                      sequence={["THE HUMAN CIVILIZATION NEEDS YOUR HELP!"]}
                       speed={50}
                       cursor={false}
                     />
@@ -435,7 +383,7 @@ const App = () => {
                     <TypeAnimation
                       style={{ whiteSpace: "pre-line" }}
                       sequence={[
-                        `- Enter each key you see from left to right while not letting go of any of them before the time runs out.\n- Be one with your keeb and have fun.`,
+                        `Greetings, human. Our forces require your expertise to breach the enemy aliens' central control system.\n\nBelow are the instructions you'll need to initiate the infiltration:\n\n- Ensure you are using a keyboard with high-level N-Key Rollover (NKRO) functionality\n- Each security layer will present a sequence of random keys\n- You must press and hold each key, one after the other from left to right\n- You'll have a finite amount of time for each security layer`,
                       ]}
                       speed={75}
                       cursor={false}
@@ -445,7 +393,9 @@ const App = () => {
               )}
             </div>
           )}
-          <div className="blink">PRESS ENTER TO START LEVEL {currentLevel}</div>
+          <div className="blink">
+            PRESS ENTER TO BREACH SECURITY LAYER {currentLevel}
+          </div>
         </div>
       )}
     </div>

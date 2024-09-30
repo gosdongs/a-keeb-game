@@ -8,6 +8,6 @@
   }
 }
 
-.keycap {
-  border-color: unset;
+body {
+  color: var(--fallback-p, oklch(var(--p) / 1));
 }

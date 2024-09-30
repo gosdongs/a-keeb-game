@@ -7,9 +7,9 @@
 }
 
 .timerDot {
-  background-color: var(--fallback-bc, oklch(var(--bc) / 1));
+  background-color: var(--fallback-p, oklch(var(--p) / 1));
 
-  border-color: var(--fallback-bc, oklch(var(--bc) / 1));
+  border-color: var(--fallback-p, oklch(var(--p) / 1));
 }
 
 @keyframes blink-animation {
